@@ -1,0 +1,59 @@
+Public Sub psubSleep(lngMilliSec As Long)
+'put in global variable for after sleep and test
+Dim boolCookedTime As Boolean
+On Error GoTo psubSleep_Error
+    pstrES = "01"
+    boolCookedTime = False
+    Debug.Print "start"
+    If lngMilliSec > 0 Then
+        Call sapiSleep(lngMilliSec)
+        boolCookedTime = True
+        Debug.Print "set to start"
+    End If
+    Do Until boolCookedTime = True
+    Loop
+    Debug.Print "End to start"
+AfterError:
+   Exit Sub
+
+psubSleep_Error:
+    psubPostError Err.Number, Err.Description, pstrES, "psubSleep", "m_Global", pstrDatabase, iStaff, True
+    GoTo AfterError
+End Sub
+
+Public Sub WriteStatusLine(ByVal frmX As Form, strTextLine As String, ByVal lngDuration As Long, ByVal boolWarning As Boolean, ByVal boolFade As Boolean)
+    Dim strES As String
+    Dim strCode As String
+On Error GoTo WriteStatusLine_Error
+    strES = "01"
+    strCode = frmX.Name
+
+    DoEvents
+   
+    If boolWarning Then
+        strES = "02"
+        frmX.lblStatus.ForeColor = RGB(200, 0, 0)
+    Else
+        strES = "03"
+        frmX.lblStatus.ForeColor = RGB(0, 0, 200)
+    End If
+    
+    frmX!lblStatus.Caption = strTextLine
+    frmX.Repaint
+    If boolFade Then
+        Call psubSleep(lngDuration)
+        strES = "04"
+        frmX.lblStatus.ForeColor = RGB(0, 0, 0)
+        frmX.lblStatus.Caption = "  "
+    End If
+
+AfterError:
+    strES = "05"
+    Exit Sub
+
+WriteStatusLine_Error:
+    psubPostError Err.Number, Err.Description, strES, "WriteStatusLine", "m_Global", pstrDatabase, iStaff, True, strCode
+    GoTo AfterError
+
+End Sub
+'---------------------------------
